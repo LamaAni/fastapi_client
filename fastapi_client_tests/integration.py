@@ -27,7 +27,7 @@ if __name__ == "__main__":
         lambda: uvicorn.run(api, host="0.0.0.0", port=8080)
     ).start()
 
-    print("Waiting for uvcorn")
+    print("Waiting for uvicorn")
     time.sleep(2)
 
     # print(my_func_get(1, 22))
