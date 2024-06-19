@@ -2,8 +2,6 @@ import requests
 import json
 import urllib
 import urllib.parse
-import urllib3
-import urllib3.util
 from inspect import Parameter
 from typing import Any, Dict, List, Tuple
 from fastapi.routing import APIRoute
