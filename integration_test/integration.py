@@ -1,5 +1,5 @@
 from fastapi_client import FastAPIClient
-from fastapi_client_tests.api import (
+from integration_test.api import (
     my_func_get,
     my_func_post,
     my_func_put,

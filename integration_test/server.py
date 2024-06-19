@@ -1,7 +1,7 @@
 import uvicorn
 import zthreading
 import zthreading.tasks
-from fastapi_client_tests.api import api
+from integration_test.api import api
 
 
 def server(api=api, host="0.0.0.0", port=8080):
