@@ -58,7 +58,7 @@ class FastAPIClientBase:
                         kwargs,
                     )
                 else:
-                    return func(*args, **kwargs)
+                    return await func(*args, **kwargs)
 
             return async_client_wrapper
         else:

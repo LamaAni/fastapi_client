@@ -15,28 +15,40 @@ class FastAPIClient(FastAPIClientBase):
         self,
         host,
         timeout: float = None,
+        headers: dict = None,
+        cookies: dict = None,
     ) -> None:
         super().__init__()
         self.host = self.parse_partial_url(host)
-
-        """The host (and port) where to find the api"""
+        """The host (schema, port, etc..) where to find the api"""
         self.args_in_body = set(["PUT", "POST", "DELETE", "PATCH"])
         """A list of methods where the arg list will be sent as body"""
         self.timeout = timeout
         """The timeout in seconds for the request"""
+        self.headers = headers
+        """Override/add to the headers as sent to the api"""
+        self.cookies = cookies
+        """Override/add to the cookies sent to the api"""
 
     @classmethod
     def parse_partial_url(cls, url: str):
+        """Convert a partial url ('localhost') to one that has
+        a schema and validity
+
+        Args:
+            url (str): The partial url
+
+        Returns:
+            str: The parsed url
+        """
         parts = urllib.parse.urlparse(url, "http")
         if not parts.netloc:
             parts = urllib.parse.urlparse("//" + url, "http")
         return parts.geturl()
 
-    def urlencode(self, params: Dict[str, Any]) -> str:
-        return urllib.parse.urlencode(params)
-
-    def bodyencode(self, params: Dict[str, Any]) -> str:
-        return json.dumps(params)
+    def serialize_cookie(self, o) -> str:
+        """Converts an object to string. Used to encode cookies (defaults to json)"""
+        return json.dumps(o)
 
     def __compose_request_args(
         self,
@@ -49,103 +61,81 @@ class FastAPIClient(FastAPIClientBase):
             if pr.name in function_args:
                 val = pr.serialize(function_args[pr.name])
                 if value_as_json and not isinstance(val, str):
-                    val = json.dumps(val)
+                    val = self.serialize_cookie(val)
                 args[pr.name] = val
 
         return args
 
-    def __compose_request(
+    def parse_function_input_arguments(
         self,
-        route: APIRoute,
-        query: List[Parameter],
+        function_args: List[Parameter],
         args: list,
         kwargs: dict,
-        method: str = None,
     ):
-        # Converting the args.
-        pr_index = 0
-        l_params = len(query)
-        l_args = len(args)
+        """Converts the arguments that were sent to the function into
+        function arguments which are to be sent to the server.
 
-        function_args = {}
-        """Holds args for the function. These will be loaded into the request"""
+        Args:
+            function_args (List[Parameter]): A list of all function arguments as defined in the function.
+            args (list): The list of arguments sent (list *args)
+            kwargs (dict): The dictionary of arguments sent (dict **kwargs)
 
-        while pr_index < l_params:
-            pr = query[pr_index]
-            if pr_index < l_args:
-                function_args[pr.name] = args[pr_index]
+        Returns:
+            dict: Mapping of argument name -> argument value
+        """
+        len_function_args = len(function_args)
+        len_args = len(args)
+        args_map = {}
+
+        idx = 0
+        while idx < len_function_args:
+            pr = function_args[idx]
+            if idx < len_args:
+                args_map[pr.name] = args[idx]
             elif pr.name in kwargs:
-                function_args[pr.name] = kwargs[pr.name]
+                args_map[pr.name] = kwargs[pr.name]
 
-            pr_index += 1
+            idx += 1
 
-        # got all the params.
-        # GET,PUT,POST,DELETE,PATCH,OPTIONS,HEAD
-        if not method:
-            if "POST" in route.methods:
-                method = "POST"
-            else:
-                method = next(iter(route.methods))
+        return args_map
 
-        query = self.__compose_request_args(function_args, route.dependant.query_params)
-        body = self.__compose_request_args(function_args, route.dependant.body_params)
+    def parse_response(self, res: requests.Response):
+        """Parse the response as sent from the server
 
-        # When body is single value, no use of json. The value is just loaded into the body.
-        # TODO: Add support for embed.
-        if len(body) == 1:
-            body = next(iter(body.values()))
+        Args:
+            res (requests.Response): The response to be parsed.
 
-        headers = self.__compose_request_args(
-            function_args, route.dependant.header_params
-        )
-        cookies = self.__compose_request_args(
-            function_args, route.dependant.cookie_params, value_as_json=True
-        )
-        path_params = self.__compose_request_args(
-            function_args, route.dependant.path_params
-        )
-
-        if len(path_params) > 0:
-            url = route.url_path_for(route.name, **path_params)
-        else:
-            url = route.path
-
-        url = urllib.parse.urljoin(self.host, url)
-
-        return requests.Request(
-            method,
-            url,
-            params=query,
-            json=body,
-            headers=headers,
-            timeout=self.timeout,
-            cookies=cookies,
-        )
+        Returns:
+            Any: The response value.
+        """
+        return res.json()
 
     def send(
         self,
         route: APIRoute,
-        query: List[Parameter],
+        function_args: List[Parameter],
         args: list,
         kwargs: dict,
         method: str = None,
     ):
-        # Converting the args.
-        pr_index = 0
-        l_params = len(query)
-        l_args = len(args)
+        """Send a request to the fast api server.
 
-        function_args = {}
-        """Holds args for the function. These will be loaded into the request"""
+        Args:
+            route (APIRoute): The route to use.
+            function_args (List[Parameter]): The full set of function argument definitions, that
 
-        while pr_index < l_params:
-            pr = query[pr_index]
-            if pr_index < l_args:
-                function_args[pr.name] = args[pr_index]
-            elif pr.name in kwargs:
-                function_args[pr.name] = kwargs[pr.name]
+            args (list): The arguments sent to the function
+            kwargs (dict): The argument dict (**kwargs) send to the function
+            method (str, optional): Override the request method. Defaults to None.
 
-            pr_index += 1
+        Returns:
+            Any: The result of the request loaded from json.
+        """
+        args_map = self.parse_function_input_arguments(
+            function_args=function_args,
+            args=args,
+            kwargs=kwargs,
+        )
 
         # got all the params.
         # GET,PUT,POST,DELETE,PATCH,OPTIONS,HEAD
@@ -155,43 +145,48 @@ class FastAPIClient(FastAPIClientBase):
             else:
                 method = next(iter(route.methods))
 
-        query = self.__compose_request_args(function_args, route.dependant.query_params)
-        body = self.__compose_request_args(function_args, route.dependant.body_params)
+        # Resolve request arg dictionaries
+        query_args = self.__compose_request_args(args_map, route.dependant.query_params)
+        headers = self.__compose_request_args(args_map, route.dependant.header_params)
+        cookies = self.__compose_request_args(
+            args_map, route.dependant.cookie_params, value_as_json=True
+        )
+        path_params = self.__compose_request_args(args_map, route.dependant.path_params)
+        body = self.__compose_request_args(args_map, route.dependant.body_params)
 
         # When body is single value, no use of json. The value is just loaded into the body.
         # TODO: Add support for embed.
         if len(body) == 1:
             body = next(iter(body.values()))
 
-        headers = self.__compose_request_args(
-            function_args, route.dependant.header_params
-        )
-        cookies = self.__compose_request_args(
-            function_args, route.dependant.cookie_params, value_as_json=True
-        )
-        path_params = self.__compose_request_args(
-            function_args, route.dependant.path_params
-        )
-
+        # When using path params, we need to update the url
+        # to match these path params.
         if len(path_params) > 0:
             url = route.url_path_for(route.name, **path_params)
         else:
+            # Just use the path.
             url = route.path
 
+        # Join with host.
         url = urllib.parse.urljoin(self.host, url)
 
-        # generating the session request
-        rsp = requests.request(
-            method,
-            url,
-            params=query,
-            json=body,
-            headers=headers,
-            timeout=self.timeout,
-            cookies=cookies,
-        )
+        # Update the headers and cookies.
+        if self.headers:
+            headers.update(self.headers)
+        if self.cookies:
+            cookies.update(self.cookies)
 
-        return rsp.json()
+        return self.parse_response(
+            requests.request(
+                method,
+                url,
+                params=query_args,
+                json=body,
+                headers=headers,
+                timeout=self.timeout,
+                cookies=cookies,
+            )
+        )
 
     async def send_async(
         self,
@@ -201,6 +196,19 @@ class FastAPIClient(FastAPIClientBase):
         kwargs: dict,
         method: str = None,
     ):
+        """Send a request to the fast api server.
+
+        Args:
+            route (APIRoute): The route to use.
+            function_args (List[Parameter]): The full set of function argument definitions, that
+
+            args (list): The arguments sent to the function
+            kwargs (dict): The argument dict (**kwargs) send to the function
+            method (str, optional): Override the request method. Defaults to None.
+
+        Returns:
+            Any: The result of the request loaded from json.
+        """
         future = asyncio.get_event_loop().run_in_executor(
             None,
             self.send,

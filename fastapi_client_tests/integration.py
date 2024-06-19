@@ -39,10 +39,10 @@ if __name__ == "__main__":
             ):
                 print(f"{f.__name__}, i={i} -> {f(1,i)}")
 
-        print(
-            "Async: ",
-            await my_fun_async(10, 10),
-        )
+            print(
+                "Async: ",
+                await my_fun_async(10, 10),
+            )
 
     asyncio.run(main())
     server.stop()
