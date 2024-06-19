@@ -1,37 +1,49 @@
-from fastapi import FastAPI
-import zthreading.tasks
 from fastapi_client import FastAPIClient
-
-api = FastAPI()
-# This is required in order to allow the fast api
-# client to activate.
-FastAPIClient.enable(api)
-
-
-@api.get("/my_func")
-def my_func_get(a: int, b: int):
-    return a + b
-
-
-@api.post("/my_func")
-def my_func_post(a: int, b: int):
-    return a + b
+from fastapi_client_tests.api import (
+    my_func_get,
+    my_func_post,
+    my_func_put,
+    my_func_delete,
+    my_func_patch,
+    my_func_path_prs,
+    my_func_cookie_prs,
+    my_func_body_prs,
+    my_fun_async,
+)
 
 
 if __name__ == "__main__":
-    import uvicorn
-    import zthreading
     import time
+    import asyncio
+    from fastapi_client_tests.server import server_thread
 
-    uv_thread = zthreading.tasks.Task(
-        lambda: uvicorn.run(api, host="0.0.0.0", port=8080)
-    ).start()
+    server = server_thread()
 
     print("Waiting for uvicorn")
-    time.sleep(2)
+    time.sleep(1)
 
-    # print(my_func_get(1, 22))
-    with FastAPIClient("localhost:8080") as client:
-        print(my_func_post(1, 22))
+    async def main():
+        # print(my_func_get(1, 22))
+        with FastAPIClient("localhost:8080"):
+            for i, f in enumerate(
+                [
+                    my_func_get,
+                    my_func_post,
+                    my_func_put,
+                    my_func_delete,
+                    my_func_patch,
+                    my_func_path_prs,
+                    my_func_cookie_prs,
+                    my_func_body_prs,
+                ]
+            ):
+                print(f"{f.__name__}, i={i} -> {f(1,i)}")
 
-    uv_thread.stop()
+        print(
+            "Async: ",
+            await my_fun_async(10, 10),
+        )
+
+    asyncio.run(main())
+    server.stop()
+    print("server stopped")

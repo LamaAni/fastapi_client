@@ -1,7 +1,7 @@
 import asyncio
 import inspect
 from abc import abstractmethod
-from typing import List, Tuple, Union
+from typing import List, Union
 from fastapi import FastAPI, APIRouter
 from fastapi.routing import APIRoute
 from fastapi.types import DecoratedCallable
@@ -44,7 +44,7 @@ class FastAPIClientBase:
     @classmethod
     def create_client_decorator(cls, func: DecoratedCallable, route: APIRoute):
         # Should be an ordered dictionary
-        function_parameters = list(inspect.signature(func).parameters.values())
+        function_args = list(inspect.signature(func).parameters.values())
 
         if asyncio.iscoroutinefunction(func):
 
@@ -53,7 +53,7 @@ class FastAPIClientBase:
                 if client:
                     return await client.send_async(
                         route,
-                        function_parameters,
+                        function_args,
                         args,
                         kwargs,
                     )
@@ -68,7 +68,7 @@ class FastAPIClientBase:
                 if client:
                     return client.send(
                         route,
-                        function_parameters,
+                        function_args,
                         args,
                         kwargs,
                     )
