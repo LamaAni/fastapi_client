@@ -47,15 +47,16 @@ class FastAPIClient(FastAPIClientBase):
         # got all the params.
         # GET,PUT,POST,DELETE,PATCH,OPTIONS,HEAD
         send_method = route.methods[0]
-        send_args_in_body = send_method in self.args_in_body
-        if not send_args_in_body and len(route.methods) > 1:
+        send_args_in_body_methods = send_method in self.args_in_body
+        if not send_args_in_body_methods and len(route.methods) > 1:
             for method in route.methods:
                 if method in self.args_in_body:
                     send_method = method
-                    send_args_in_body = True
+                    send_args_in_body_methods = True
                     break
 
         # Compose send url
+        route.url_path_for()
 
     async def send_async(
         self,
