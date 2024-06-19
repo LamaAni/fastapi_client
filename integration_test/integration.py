@@ -15,7 +15,7 @@ from integration_test.api import (
 if __name__ == "__main__":
     import time
     import asyncio
-    from fastapi_client_tests.server import server_thread
+    from integration_test.server import server_thread
 
     server = server_thread()
 

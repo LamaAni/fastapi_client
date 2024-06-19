@@ -48,6 +48,11 @@ def my_func_body_prs(a: Annotated[int, Body()], b: int):
     return a + b
 
 
+@api.get("/my_func_body_multi_prs")
+def my_func_body_multi_prs(a: Annotated[int, Body()], b: Annotated[int, Body()]):
+    return a + b
+
+
 @api.get("/my_fun_async")
 async def my_fun_async(a: int, b: int):
     return a + b
