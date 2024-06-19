@@ -2,6 +2,8 @@ import requests
 import json
 import urllib
 import urllib.parse
+import urllib3
+import urllib3.util
 from inspect import Parameter
 from typing import Any, Dict, List, Tuple
 from fastapi.routing import APIRoute
@@ -9,12 +11,29 @@ from fastapi_client.base_client import FastAPIClientBase
 
 
 class FastAPIClient(FastAPIClientBase):
-    def __init__(self, host) -> None:
+    def __init__(
+        self,
+        host,
+        send_args_in_query_string: bool = False,
+        timeout: float = None,
+    ) -> None:
         super().__init__()
-        self.host = host
+        self.host = self.parse_partial_url(host)
+
         """The host (and port) where to find the api"""
         self.args_in_body = set(["PUT", "POST", "DELETE", "PATCH"])
         """A list of methods where the arg list will be sent as body"""
+        self.send_args_in_query_string = send_args_in_query_string
+        """If true send all function args as part of the query string"""
+        self.timeout = timeout
+        """The timeout in seconds for the request"""
+
+    @classmethod
+    def parse_partial_url(cls, url: str):
+        parts = urllib.parse.urlparse(url, "http")
+        if not parts.netloc:
+            parts = urllib.parse.urlparse("//" + url, "http")
+        return parts.geturl()
 
     def urlencode(self, params: Dict[str, Any]) -> str:
         return urllib.parse.urlencode(params)
@@ -28,6 +47,7 @@ class FastAPIClient(FastAPIClientBase):
         params: List[Parameter],
         args: list,
         kwargs: dict,
+        method: str = None,
     ):
         # Converting the args.
         pr_index = 0
@@ -46,17 +66,34 @@ class FastAPIClient(FastAPIClientBase):
 
         # got all the params.
         # GET,PUT,POST,DELETE,PATCH,OPTIONS,HEAD
-        send_method = route.methods[0]
-        send_args_in_body_methods = send_method in self.args_in_body
-        if not send_args_in_body_methods and len(route.methods) > 1:
-            for method in route.methods:
-                if method in self.args_in_body:
-                    send_method = method
-                    send_args_in_body_methods = True
-                    break
+        if not method:
+            if "POST" in route.methods:
+                method = "POST"
+            else:
+                method = next(iter(route.methods))
 
         # Compose send url
-        route.url_path_for()
+        # Only works for normal routes
+        # no complex or combined routes.
+        url = urllib.parse.urljoin(self.host, route.path)
+
+        request_params = None
+        body_params = None
+        if self.send_args_in_query_string:
+            request_params = request_args
+        else:
+            body_params = request_args
+
+        # generating the session request
+        rsp = requests.request(
+            method,
+            url,
+            params=request_params,
+            json=body_params,
+            timeout=self.timeout,
+        )
+
+        return rsp.json()
 
     async def send_async(
         self,
