@@ -4,7 +4,7 @@ import json
 import urllib
 import urllib.parse
 from inspect import Parameter
-from typing import Any, Dict, List, Tuple
+from typing import List
 from fastapi.routing import APIRoute
 from fastapi_client.base_client import FastAPIClientBase
 from fastapi._compat import ModelField
