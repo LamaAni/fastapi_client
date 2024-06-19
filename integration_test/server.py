@@ -1,4 +1,3 @@
-#!python
 import uvicorn
 import zthreading
 import zthreading.tasks
