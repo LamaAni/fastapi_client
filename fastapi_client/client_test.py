@@ -16,7 +16,10 @@ from integration_test.api import (
     my_func_path_prs,
     my_func_cookie_prs,
     my_func_body_prs,
+    my_func_body_multi_prs,
     my_fun_async,
+    my_fun_string,
+    my_fun_dict,
 )
 
 
@@ -92,6 +95,7 @@ class TestClient:
             my_func_path_prs,
             my_func_cookie_prs,
             my_func_body_prs,
+            my_func_body_multi_prs,
             args=[1, 2],
         )
 
@@ -100,6 +104,13 @@ class TestClient:
         await self.run_api_calls_async(
             my_fun_async,
             args=[1, 2],
+        )
+
+    @pytest.mark.asyncio
+    async def test_async_special_type_calls(self):
+        await self.run_api_calls_async(my_fun_string, args=["a", "b"])
+        await self.run_api_calls_async(
+            my_fun_dict, args=[{"a": "b"}, {"a": 1, "c": "d"}]
         )
 
 

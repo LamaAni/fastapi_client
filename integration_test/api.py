@@ -61,3 +61,15 @@ def my_func_body_multi_prs(a: Annotated[int, Body()], b: Annotated[int, Body()])
 @api.get("/my_fun_async")
 async def my_fun_async(a: int, b: int):
     return a + b
+
+
+@api.get("/my_fun_string")
+async def my_fun_string(a: str, b: str):
+    return a + b
+
+
+@api.get("/my_fun_dict")
+async def my_fun_dict(a: dict, b: dict):
+    c = a.copy()
+    c.update(b)
+    return b
