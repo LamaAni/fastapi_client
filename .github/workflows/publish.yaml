@@ -44,7 +44,7 @@ jobs:
 
       - name: Test
         run: |
-          ./test fastapi_client -v
+          pytest fastapi_client -v
 
       - name: Build
         env:
