@@ -1,0 +1,58 @@
+# This workflows will upload a Python Package using Twine when a release is created
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+
+name: Upload Python Package
+on:
+  release:
+    types: [created]
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dev dependencies
+        run: |
+          python --version && 
+            pip install yapenv &&
+            yapenv requirements export --env dev | xargs pip install
+
+      - name: Prepare version
+        env:
+          VERSION_PATH: "yapenv/.version"
+          GITHUB_BRANCH: ${{ github.ref }}
+        run: |
+          echo "Version number: ${GITHUB_REF##*/}"
+          echo "${GITHUB_REF##*/}" > "$VERSION_PATH" || exit $?
+          cat "$VERSION_PATH"
+
+      - name: Lint
+        run: |
+          flake8 --verbose
+
+      - name: Test
+        run: |
+          ./test fastapi_client -v
+
+      - name: Build
+        env:
+          VERSION_PATH: "yapenv/.version"
+        run: |
+          python setup.py sdist bdist_wheel
+
+      - name: Build and publish
+        if: ${{ github.event_name=='release' }}
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          twine upload dist/*
