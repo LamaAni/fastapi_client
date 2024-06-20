@@ -60,12 +60,6 @@ pip install fastapi_client
 
 Feel free to ping me in issues or directly on LinkedIn to contribute.
 
-# Future implementation
-
-We plan to support multiple python version per environment.
-
-Looking for help on this subject.
-
 # License
 
 Copyright © `Zav Shotan` and other [contributors](graphs/contributors).
