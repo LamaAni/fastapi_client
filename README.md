@@ -3,9 +3,10 @@
 An easy to use, integrated client for FastApi,
 
 1. Uses the same decorators as FastApi
-2. Dose not require one to "recreate" clients and works out of the box.
-3. Allows defining the client "host" via the `with` command.
-4. Works with async as well.
+1. Dose not require one to "recreate" clients and works out of the box.
+1. Allows defining the client "host" via the `with` command.
+1. Works with async as well.
+1. Dose not affect the operation of the api in any way.
 
 ## BETA
 
