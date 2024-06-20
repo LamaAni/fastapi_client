@@ -52,6 +52,12 @@ with FastAPIClient("localhost:8080"):
     print(echo(1, 2))
 ```
 
+## Install
+
+```shell
+pip install fastapi_client
+```
+
 # Contribution
 
 Feel free to ping me in issues or directly on LinkedIn to contribute.
