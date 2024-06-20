@@ -34,7 +34,7 @@ else:
 version = version or os.environ.get("SETUP_VERSION", "0.0.0")
 
 setup(
-    name="yapenv",  # Required
+    name="fastapi_client",  # Required
     version=version,  # Required
     description="A client for the fastapi environment",
     long_description=long_description,
