@@ -49,43 +49,58 @@ class TestClient:
         self.server.stop()
         self.client = None
 
-    def run_api_calls(self, calls: List[callable]):
-        for i, f in enumerate(calls):
-            print(f"Direct - {f.__name__}, i={i} -> {f(1,i)}")
-        with self.client:
-            for i, f in enumerate(calls):
-                print(f"Api - {f.__name__}, i={i} -> {f(1,i)}")
+    def run_api_calls(self, *calls: List[callable], args: list = []):
+        def test_call(call):
+            rslt_direct = call(*args)
+            with self.client:
+                rslt_remote = call(*args)
+            if rslt_direct != rslt_remote:
+                raise Exception(
+                    "Invalid response, direct function call result != remote result."
+                    + f" {rslt_direct} != {rslt_remote}"
+                )
 
-    async def run_api_calls_async(self, calls: List[callable]):
-        for i, f in enumerate(calls):
-            print(f"Direct - {f.__name__}, i={i} -> {await f(1,i)}")
-        with self.client:
-            for i, f in enumerate(calls):
-                print(f"Api - {f.__name__}, i={i} -> {await f(1,i)}")
+        for c in calls:
+            test_call(c)
+
+    async def run_api_calls_async(self, *calls: List[callable], args: list = []):
+        async def test_call(call):
+            rslt_direct = call(*args)
+            with self.client:
+                rslt_remote = await call(*args)
+            if rslt_direct != rslt_remote:
+                raise Exception(
+                    "Invalid response, direct function call result != remote result."
+                    + f" {rslt_direct} != {rslt_remote}"
+                )
+
+        for c in calls:
+            await test_call(c)
 
     def test_norm_api_calls(self):
         self.run_api_calls(
-            [
-                my_func_get,
-                my_func_post,
-                my_func_put,
-                my_func_delete,
-                my_func_patch,
-            ]
+            my_func_get,
+            my_func_post,
+            my_func_put,
+            my_func_delete,
+            my_func_patch,
+            args=[1, 2],
         )
 
     def test_custom_param_api_calls(self):
         self.run_api_calls(
-            [
-                my_func_path_prs,
-                my_func_cookie_prs,
-                my_func_body_prs,
-            ]
+            my_func_path_prs,
+            my_func_cookie_prs,
+            my_func_body_prs,
+            args=[1, 2],
         )
 
     @pytest.mark.asyncio
     async def test_async_api_calls(self):
-        await self.run_api_calls_async([my_fun_async])
+        await self.run_api_calls_async(
+            my_fun_async,
+            args=[1, 2],
+        )
 
 
 if __name__ == "__main__":
