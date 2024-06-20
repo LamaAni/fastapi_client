@@ -1,8 +1,13 @@
+python_version: "3.10"
+venv_directory: .venv
 environments:
   dev:
     requirements:
-    - import: requirements.dev.txt
-python_version: '3.10'
+      - import: requirements.dev.txt
+
+  ci:
+    requirements:
+      - import: requirements.ci.txt
+
 requirements:
-- import: requirements.txt
-venv_directory: .venv
+  - import: requirements.txt
