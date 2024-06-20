@@ -7,9 +7,11 @@ api = FastAPI()
 # client to activate.
 FastAPIClient.enable(api)
 
+
 @api.get("/echo")
 def echo(a: int, b: int):
     return a + b
+
 
 @api.get("/my_func_get")
 def my_func_get(a: int, b: int):

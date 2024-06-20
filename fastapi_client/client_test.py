@@ -3,7 +3,6 @@ import time
 from typing import List
 import requests
 import zthreading
-from fastapi import FastAPI
 import zthreading.tasks
 from fastapi_client import FastAPIClient
 from integration_test.server import server_task
