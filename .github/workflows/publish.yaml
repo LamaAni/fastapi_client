@@ -27,7 +27,7 @@ jobs:
         run: |
           python --version && 
             pip install yapenv &&
-            yapenv requirements export --env dev | xargs pip install
+            yapenv requirements export --env ci | xargs pip install
 
       - name: Lint
         run: |
