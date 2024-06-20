@@ -17,16 +17,13 @@ PR's welcome.
 To use the client, you must enable it on the api **before** defining the api methods
 
 ```python
-
-from typing import Annotated
-from fastapi import FastAPI, Cookie, Body
+from fastapi import FastAPI
 from fastapi_client import FastAPIClient
 
 api = FastAPI()
 
-# This is required in order to allow the fast api
-# client to wrap around any function calls.
-# NOTE: It DOSE NOT AFFECT the operation of the API, and it dose not slow it down
+# This is REQUIRED in order to allow the fast api client to wrap around any function calls.
+# NOTE: The client DOSE NOT AFFECT the operation of the API, and dose not slow it down
 # in any way.
 FastAPIClient.enable(api)
 
