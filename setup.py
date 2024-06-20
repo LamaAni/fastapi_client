@@ -23,13 +23,13 @@ with open(os.path.join(REPO_PATH, "requirements.txt"), "r") as requirements_file
         r.strip() for r in requirements_text.split("\n") if len(r.strip()) > 0
     ]
 
-version = None
+version = "0.0.0"
 if os.path.isfile(VERSION_PATH):
     with open(VERSION_PATH, "r") as file:
         version = file.read()
 else:
     logging.info("Version file not found @ " + VERSION_PATH)
-    logging.info("Using default version debug")
+    logging.info(f"Using default version {version}")
 
 version = version or os.environ.get("SETUP_VERSION", "0.0.0")
 

@@ -29,15 +29,6 @@ jobs:
             pip install yapenv &&
             yapenv requirements export --env dev | xargs pip install
 
-      - name: Prepare version
-        env:
-          VERSION_PATH: ".version"
-          GITHUB_BRANCH: ${{ github.ref }}
-        run: |
-          echo "Version number: ${GITHUB_REF##*/}"
-          echo "${GITHUB_REF##*/}" > "$VERSION_PATH" || exit $?
-          cat "$VERSION_PATH"
-
       - name: Lint
         run: |
           flake8 --verbose
@@ -45,6 +36,16 @@ jobs:
       - name: Test
         run: |
           pytest fastapi_client -v
+
+      - name: Prepare version (release)
+        if: ${{ github.event_name=='release' }}
+        env:
+          VERSION_PATH: ".version"
+          GITHUB_BRANCH: ${{ github.ref }}
+        run: |
+          echo "Version number: ${GITHUB_REF##*/}"
+          echo "${GITHUB_REF##*/}" > "$VERSION_PATH" || exit $?
+          cat "$VERSION_PATH"
 
       - name: Build
         env:
