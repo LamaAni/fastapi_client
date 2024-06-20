@@ -1,5 +1,6 @@
 import os
 import time
+import pytest
 from typing import List
 import requests
 import zthreading
@@ -55,6 +56,13 @@ class TestClient:
             for i, f in enumerate(calls):
                 print(f"Api - {f.__name__}, i={i} -> {f(1,i)}")
 
+    async def run_api_calls_async(self, calls: List[callable]):
+        for i, f in enumerate(calls):
+            print(f"Direct - {f.__name__}, i={i} -> {await f(1,i)}")
+        with self.client:
+            for i, f in enumerate(calls):
+                print(f"Api - {f.__name__}, i={i} -> {await f(1,i)}")
+
     def test_norm_api_calls(self):
         self.run_api_calls(
             [
@@ -66,10 +74,7 @@ class TestClient:
             ]
         )
 
-    async def test_async_api_calls(self):
-        self.run_api_calls([my_fun_async])
-
-    async def test_custom_param_api_calls(self):
+    def test_custom_param_api_calls(self):
         self.run_api_calls(
             [
                 my_func_path_prs,
@@ -78,8 +83,11 @@ class TestClient:
             ]
         )
 
+    @pytest.mark.asyncio
+    async def test_async_api_calls(self):
+        await self.run_api_calls_async([my_fun_async])
+
 
 if __name__ == "__main__":
-    import pytest
 
     pytest.main([__file__])
