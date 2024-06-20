@@ -14,7 +14,7 @@ PR's welcome.
 
 # TL;DR
 
-To use the client you must call define the api,
+To use the client, you must enable it on the api **before** defining the api methods
 
 ```python
 
