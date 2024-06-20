@@ -65,7 +65,7 @@ class TestClient:
 
     async def run_api_calls_async(self, *calls: List[callable], args: list = []):
         async def test_call(call):
-            rslt_direct = call(*args)
+            rslt_direct = await call(*args)
             with self.client:
                 rslt_remote = await call(*args)
             if rslt_direct != rslt_remote:
