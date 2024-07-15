@@ -1,6 +1,8 @@
 from typing import Annotated
 from fastapi import FastAPI, Cookie, Body
 
+API_HOST = "0.0.0.0"
+API_PORT = 8180
 
 api = FastAPI()
 

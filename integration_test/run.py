@@ -4,6 +4,8 @@ from fastapi_client import FastAPIClient, enable_fastapi_client
 enable_fastapi_client()
 
 from integration_test.api import (  # noqa E402
+    API_HOST,
+    API_PORT,
     my_func_get,
     my_func_post,
     my_func_put,
@@ -28,7 +30,7 @@ if __name__ == "__main__":
 
     async def main():
         # print(my_func_get(1, 22))
-        with FastAPIClient("localhost:8080"):
+        with FastAPIClient(f"{API_HOST}:{API_PORT}"):
             for i, f in enumerate(
                 [
                     my_func_get,
