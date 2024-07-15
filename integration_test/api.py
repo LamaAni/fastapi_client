@@ -1,11 +1,11 @@
 from typing import Annotated
 from fastapi import FastAPI, Cookie, Body
-from fastapi_client import FastAPIClient
+
+API_HOST = "0.0.0.0"
+API_PORT = 8180
+API_CLIENT_URL = f"{API_HOST}:{API_PORT}"
 
 api = FastAPI()
-# This is required in order to allow the fast api
-# client to activate.
-FastAPIClient.enable(api)
 
 
 @api.get("/echo")

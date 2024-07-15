@@ -1,5 +1,10 @@
-from fastapi_client import FastAPIClient
-from integration_test.api import (
+from fastapi_client import FastAPIClient, enable_fastapi_client
+
+# Enable the client before loading the api.
+enable_fastapi_client()
+
+from integration_test.api import (  # noqa E402
+    API_CLIENT_URL,
     my_func_get,
     my_func_post,
     my_func_put,
@@ -24,7 +29,7 @@ if __name__ == "__main__":
 
     async def main():
         # print(my_func_get(1, 22))
-        with FastAPIClient("localhost:8080"):
+        with FastAPIClient(API_CLIENT_URL):
             for i, f in enumerate(
                 [
                     my_func_get,

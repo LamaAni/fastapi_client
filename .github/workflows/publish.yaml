@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install dev dependencies
+      - name: Install dependencies
         run: |
           python --version && 
             pip install yapenv &&
@@ -36,6 +36,11 @@ jobs:
       - name: Test
         run: |
           pytest fastapi_client -v
+
+      - name: Test Integration
+        run: |
+          export PYTHONPATH="$PYTHONPATH:$PWD"
+          python ./integration_test/run.py
 
       - name: Prepare version (release)
         if: ${{ github.event_name=='release' }}
