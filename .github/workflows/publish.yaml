@@ -39,6 +39,7 @@ jobs:
 
       - name: Test Integration
         run: |
+          export PYTHONPATH="$PYTHONPATH:$PWD"
           python ./integration_test/run.py
 
       - name: Prepare version (release)
