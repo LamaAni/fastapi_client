@@ -16,7 +16,7 @@ PR's welcome.
 
 # TL;DR
 
-To use the client, you must enable it on the api **before** defining/importing the api methods
+To use the client, you must enable it **before** defining/importing the api methods
 
 If we are using the api `api_module` defined below,
 
