@@ -57,7 +57,7 @@ with FastAPIClient("localhost:8080"):
 
 ### Non global configuration
 
-To define an api client that works only on a specific object, you must
+To define an api client that works only on a specific api/router, you must
 enable the api client on the api object before defining the api functions,
 
 ```python
@@ -85,7 +85,7 @@ pip install fastapi_client
 
 # Contribution
 
-Feel free to ping me in issues or directly on LinkedIn to contribute.
+Feel free to ping me for issues or submit a PR to contribute.
 
 # License
 
