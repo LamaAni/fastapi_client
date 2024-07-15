@@ -5,9 +5,11 @@ from typing import List
 import requests
 import zthreading
 import zthreading.tasks
-from fastapi_client import FastAPIClient
+from fastapi_client import FastAPIClient, enable_fast_api_client
 from integration_test.server import server_task
-from integration_test.api import (
+
+enable_fast_api_client()
+from integration_test.api import (  # noqa E402
     my_func_get,
     my_func_post,
     my_func_put,

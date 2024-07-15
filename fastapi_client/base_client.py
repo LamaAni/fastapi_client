@@ -43,6 +43,15 @@ class FastAPIClientBase:
 
     @classmethod
     def create_client_decorator(cls, func: DecoratedCallable, route: APIRoute):
+        """Generates a client decorator (route function call) from the route.
+
+        Args:
+            func (DecoratedCallable): The function to decorate
+            route (APIRoute): The route to decorate
+
+        Returns:
+            func: The decorated function
+        """
         # Should be an ordered dictionary
         function_args = list(inspect.signature(func).parameters.values())
 
@@ -78,26 +87,56 @@ class FastAPIClientBase:
             return client_wrapper
 
     @classmethod
-    def enable(cls, router: Union[FastAPI, APIRouter]):
-        if isinstance(router, FastAPI):
-            router = router.router
+    def enable(
+        cls,
+        router: Union[FastAPI, APIRouter] = None,
+    ):
+        """Enable the fast api client support
 
-        # Bind and override
-        api_route = router.api_route
+        Args:
+            router (Union[FastAPI, APIRouter], optional): If None - enables globally,
+                otherwise enables on the specific api. Defaults to None.
 
-        def api_route_override(*args, **kwargs):
-            api_route_decorator = api_route(*args, **kwargs)
+        """
+        if router is None:
+            # In the case we want to globally enable the client
 
-            def client_decorator(func: DecoratedCallable):
-                # Invoke the internal route decorator, to add the route
-                api_route_decorator(func)
+            # Bind and override
+            api_route = APIRouter.api_route
 
-                # Create the decorator, routes[-1] is the last route added
-                return cls.create_client_decorator(func, router.routes[-1])
+            def api_route_class_override(self: APIRouter, *args, **kwargs):
+                api_route_decorator = api_route(self, *args, **kwargs)
 
-            return client_decorator
+                def client_decorator(func: DecoratedCallable):
+                    # Invoke the internal route decorator, to add the route
+                    api_route_decorator(func)
 
-        router.api_route = api_route_override
+                    # Create the decorator, routes[-1] is the last route added
+                    return cls.create_client_decorator(func, self.routes[-1])
+
+                return client_decorator
+
+            APIRouter.api_route = api_route_class_override
+        else:
+            if isinstance(router, FastAPI):
+                router = router.router
+
+            # Bind and override
+            api_route = router.api_route
+
+            def api_route_class_override(*args, **kwargs):
+                api_route_decorator = api_route(*args, **kwargs)
+
+                def client_decorator(func: DecoratedCallable):
+                    # Invoke the internal route decorator, to add the route
+                    api_route_decorator(func)
+
+                    # Create the decorator, routes[-1] is the last route added
+                    return cls.create_client_decorator(func, router.routes[-1])
+
+                return client_decorator
+
+            router.api_route = api_route_class_override
 
     def __enter__(self):
         """Calls when enters with"""
@@ -120,3 +159,8 @@ class FastAPIClientBase:
             raise FastAPIClientError(
                 "Failed to properly exit the fast api with call, failed to delete current from stack"
             ) from ex
+
+
+def enable_fast_api_client():
+    """Globally enable the fast api client support. Must be called before any apis are imported"""
+    FastAPIClientBase.enable(None)

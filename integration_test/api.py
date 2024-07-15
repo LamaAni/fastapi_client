@@ -1,11 +1,8 @@
 from typing import Annotated
 from fastapi import FastAPI, Cookie, Body
-from fastapi_client import FastAPIClient
+
 
 api = FastAPI()
-# This is required in order to allow the fast api
-# client to activate.
-FastAPIClient.enable(api)
 
 
 @api.get("/echo")

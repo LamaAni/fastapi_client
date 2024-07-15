@@ -1,5 +1,9 @@
-from fastapi_client import FastAPIClient
-from integration_test.api import (
+from fastapi_client import FastAPIClient, enable_fast_api_client
+
+# Enable the client before loading the api.
+enable_fast_api_client()
+
+from integration_test.api import (  # noqa E402
     my_func_get,
     my_func_post,
     my_func_put,
