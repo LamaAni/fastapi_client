@@ -2,7 +2,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.types import DecoratedCallable
-from fastapi_client.base_client import FastAPIClientBase, enable_fast_api_client
+from fastapi_client.base_client import FastAPIClientBase, enable_fastapi_client
 
 
 class FastAPIClientTester(FastAPIClientBase):
@@ -63,7 +63,7 @@ def test_basic_client_on_router():
 
 def test_basic_client():
     api = FastAPI()
-    enable_fast_api_client()
+    enable_fastapi_client()
     do_run_basic_client_test(api)
 
 

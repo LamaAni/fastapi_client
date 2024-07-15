@@ -161,6 +161,6 @@ class FastAPIClientBase:
             ) from ex
 
 
-def enable_fast_api_client():
+def enable_fastapi_client():
     """Globally enable the fast api client support. Must be called before any apis are imported"""
     FastAPIClientBase.enable(None)
