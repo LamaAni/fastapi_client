@@ -37,6 +37,10 @@ jobs:
         run: |
           pytest fastapi_client -v
 
+      - name: Test Integration
+        run: |
+          python ./integration_test/run.py
+
       - name: Prepare version (release)
         if: ${{ github.event_name=='release' }}
         env:
