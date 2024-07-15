@@ -3,6 +3,7 @@ from fastapi import FastAPI, Cookie, Body
 
 API_HOST = "0.0.0.0"
 API_PORT = 8180
+API_CLIENT_URL = f"{API_HOST}:{API_PORT}"
 
 api = FastAPI()
 
