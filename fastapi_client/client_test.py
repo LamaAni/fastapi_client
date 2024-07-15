@@ -10,6 +10,7 @@ from integration_test.server import server_task
 
 enable_fastapi_client()
 from integration_test.api import (  # noqa E402
+    API_CLIENT_URL,
     my_func_get,
     my_func_post,
     my_func_put,
@@ -40,7 +41,7 @@ class TestClient:
     def setup_class(self):
         self.server = server_task()
         self.client = FastAPIClient(
-            os.environ.get("FASTAPI_CLIENT_HOST", "localhost:8080")
+            os.environ.get("FASTAPI_CLIENT_HOST", API_CLIENT_URL)
         )
         # wait for server
         for i in range(10):
